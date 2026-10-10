@@ -1,0 +1,2339 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبار فهم مشروع Zero Plus</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --accent: #38bdf8;
+        --accent2: #22c55e;
+        --danger: #ef4444;
+        --warn: #f59e0b;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --border: #334155;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e1b4b 50%,
+          #0f172a 100%
+        );
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Screens */
+      .screen {
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+      .screen.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* Header / Progress */
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card);
+        border-radius: 16px;
+        padding: 14px 20px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .progress-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: #334155;
+        border-radius: 4px;
+        margin-top: 12px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border-radius: 4px;
+        transition: width 0.3s;
+      }
+      .timer {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+      }
+      .timer.danger {
+        color: var(--danger);
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.6;
+        }
+      }
+      .violations {
+        color: var(--warn);
+        font-size: 0.9rem;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+      }
+      h2 {
+        font-size: 1.35rem;
+        margin-bottom: 16px;
+        color: var(--accent);
+      }
+      .subtitle {
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #fff;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+      }
+      .btn-success {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+      }
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .btn-ghost:hover {
+        background: #334155;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+
+      /* Options */
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 20px 0;
+      }
+      .option {
+        background: #0f172a;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .option:hover {
+        border-color: var(--accent);
+        background: #1e293b;
+      }
+      .option.selected {
+        border-color: var(--accent);
+        background: rgba(56, 189, 248, 0.15);
+      }
+      .option.correct {
+        border-color: var(--accent2);
+        background: rgba(34, 197, 94, 0.15);
+      }
+      .option.wrong {
+        border-color: var(--danger);
+        background: rgba(239, 68, 68, 0.15);
+      }
+      .option input {
+        margin-top: 4px;
+        accent-color: var(--accent);
+      }
+      .option label {
+        cursor: pointer;
+        flex: 1;
+      }
+
+      /* Feedback */
+      .feedback {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 12px;
+        display: none;
+      }
+      .feedback.show {
+        display: block;
+      }
+      .feedback.correct {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid var(--accent2);
+      }
+      .feedback.wrong {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid var(--danger);
+      }
+      .feedback .title {
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .feedback .note {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      /* Matching / Ordering */
+      .match-list,
+      .order-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 16px 0;
+      }
+      .match-item,
+      .order-item {
+        background: #0f172a;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: grab;
+      }
+      .order-item.dragging {
+        opacity: 0.5;
+      }
+      .match-select {
+        background: #1e293b;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.95rem;
+        min-width: 200px;
+      }
+
+      /* Fill blanks */
+      .paragraph {
+        background: #0f172a;
+        border-radius: 14px;
+        padding: 20px;
+        line-height: 2;
+        font-size: 1.05rem;
+        border: 1px solid var(--border);
+      }
+      .blank {
+        display: inline-block;
+        min-width: 110px;
+        border-bottom: 2px dashed var(--accent);
+        padding: 2px 8px;
+        margin: 0 4px;
+        text-align: center;
+        color: var(--accent);
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .blank.filled {
+        border-bottom-style: solid;
+        background: rgba(56, 189, 248, 0.1);
+      }
+      .blank.correct {
+        border-color: var(--accent2);
+        color: var(--accent2);
+      }
+      .blank.wrong {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+      .word-bank {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+        background: var(--card);
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+      }
+      .word-chip {
+        background: #0f172a;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .word-chip:hover {
+        border-color: var(--accent);
+        background: rgba(56, 189, 248, 0.1);
+      }
+      .word-chip.used {
+        opacity: 0.35;
+        pointer-events: none;
+        text-decoration: line-through;
+      }
+      .word-chip.selected {
+        border-color: var(--accent);
+        background: rgba(56, 189, 248, 0.25);
+      }
+
+      /* Results */
+      .score-circle {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: conic-gradient(
+          var(--accent2) calc(var(--pct) * 1%),
+          #334155 0
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        position: relative;
+      }
+      .score-circle::before {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        background: var(--card);
+        border-radius: 50%;
+      }
+      .score-value {
+        position: relative;
+        font-size: 2.2rem;
+        font-weight: 800;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 14px;
+        margin: 24px 0;
+      }
+      .stat-box {
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid var(--border);
+      }
+      .stat-box .num {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+      .stat-box .label {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .analysis {
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 18px;
+        margin-top: 16px;
+        border: 1px solid var(--border);
+      }
+      .analysis h3 {
+        color: var(--warn);
+        margin-bottom: 10px;
+      }
+      .analysis ul {
+        padding-right: 20px;
+        color: var(--muted);
+      }
+
+      /* Warning overlay */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .overlay.show {
+        display: flex;
+      }
+      .overlay h2 {
+        color: var(--danger);
+        font-size: 1.8rem;
+      }
+      .overlay p {
+        color: var(--muted);
+        max-width: 400px;
+        text-align: center;
+      }
+
+      /* Level badges */
+      .level-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .lvl-1 {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+      }
+      .lvl-2 {
+        background: rgba(234, 179, 8, 0.2);
+        color: #facc15;
+      }
+      .lvl-3 {
+        background: rgba(249, 115, 22, 0.2);
+        color: #fb923c;
+      }
+      .lvl-4 {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+      }
+      .lvl-5 {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+      }
+
+      .q-num {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+      }
+      .type-tag {
+        display: inline-block;
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--accent);
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- START SCREEN -->
+      <div id="startScreen" class="screen active">
+        <div class="card" style="text-align: center; padding: 40px 28px">
+          <h1>🛡️ اختبار فهم مشروع Zero Plus</h1>
+          <p class="subtitle" style="margin-top: 12px">
+            110 سؤال • ترتيب حسب النوع • تصحيح فوري • حماية ضد الغش
+          </p>
+          <div
+            style="
+              background: #0f172a;
+              border-radius: 14px;
+              padding: 20px;
+              margin: 24px 0;
+              text-align: right;
+              border: 1px solid var(--border);
+            "
+          >
+            <p style="margin-bottom: 10px"><strong>محتوى الاختبار:</strong></p>
+            <ul style="padding-right: 20px; color: var(--muted)">
+              <li>20 سؤال اختيار من متعدد (مستويات من الأسهل للأصعب)</li>
+              <li>40 سؤال متنوع (اختيار متعدد / توصيل / ترتيب)</li>
+              <li>20 سؤال صح وغلط</li>
+              <li>30 فراغ في فقرة واحدة (بنك كلمات)</li>
+            </ul>
+            <p style="margin-top: 14px">
+              <strong>الوقت الكلي:</strong> 37 دقيقة و 30 ثانية (مؤقت واحد للكل)
+            </p>
+            <p style="margin-top: 8px; color: var(--warn)">
+              <strong>⚠️ الحماية:</strong> ملء الشاشة إجباري + كشف تغيير التبويب
+              + كشف فتح برامج أخرى
+            </p>
+          </div>
+          <button
+            class="btn btn-primary"
+            id="startBtn"
+            style="font-size: 1.2rem; padding: 16px 40px"
+          >
+            ابدأ الاختبار الآن
+          </button>
+        </div>
+      </div>
+
+      <!-- QUIZ SCREEN -->
+      <div id="quizScreen" class="screen">
+        <div class="topbar">
+          <div>
+            <span id="qProgress">السؤال 1 / 110</span>
+            <div class="progress-bar-bg">
+              <div
+                class="progress-bar-fill"
+                id="progressFill"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+          <div style="text-align: left">
+            <div class="timer" id="timerDisplay">37:30</div>
+            <div class="violations" id="violationsDisplay">مخالفات: 0</div>
+          </div>
+        </div>
+        <div class="card" id="questionCard">
+          <!-- Question content injected here -->
+        </div>
+      </div>
+
+      <!-- RESULT SCREEN -->
+      <div id="resultScreen" class="screen">
+        <div class="card" style="text-align: center">
+          <h1>📊 نتيجة الاختبار</h1>
+          <div class="score-circle" id="scoreCircle" style="--pct: 0">
+            <div class="score-value" id="scorePercent">0%</div>
+          </div>
+          <div class="stats">
+            <div class="stat-box">
+              <div class="num" id="statCorrect" style="color: var(--accent2)">
+                0
+              </div>
+              <div class="label">صح</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="statWrong" style="color: var(--danger)">
+                0
+              </div>
+              <div class="label">غلط</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="statPoints">0</div>
+              <div class="label">نقطة</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="statTotal">110</div>
+              <div class="label">إجمالي</div>
+            </div>
+          </div>
+          <div
+            id="gradeText"
+            style="font-size: 1.2rem; font-weight: 600; margin: 16px 0"
+          ></div>
+          <div class="analysis" id="analysisBox"></div>
+          <div class="btn-group" style="justify-content: center">
+            <button class="btn btn-primary" onclick="location.reload()">
+              إعادة الاختبار
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anti-cheat overlay -->
+    <div class="overlay" id="cheatOverlay">
+      <h2>⚠️ مخالفة غش مكتشفة</h2>
+      <p id="cheatMsg">
+        تم رصد محاولة خروج من نافذة الاختبار أو تغيير التبويب.
+      </p>
+      <button class="btn btn-danger" id="returnBtn">العودة للاختبار</button>
+    </div>
+
+    <script>
+      /* ===================== DATA ===================== */
+      const MCQ = [
+        {
+          id: 1,
+          level: 1,
+          q: "إيه هو Zero Plus بالظبط؟",
+          opts: [
+            "حارس أمن بتنزّله الشركة على سيرفرها الأصلي، وبيفحص الطلبات بعد ما توصل للتطبيق.",
+            "حارس أمن ذكي بين زوار الإنترنت والسيرفر الحقيقي للشركة، كل طلب بيعدي عليه الأول وهو يقرر: سماح أو تحديد معدل أو حظر، ويسجل كل حاجة في لوحة تحكم.",
+            "خدمة CDN بتخزن نسخة من الموقع وتسرّع التحميل، وبتحظر الـ IP المشبوه كميزة جانبية.",
+            "نظام بيسجل الهجمات بعد ما تحصل ويبعت تقارير بس، من غير ما يتدخل في الطلبات.",
+          ],
+          ans: 1,
+          note: "A: SaaS مفيش تنزيل، وبيفحص قبل السيرفر. C: مش CDN. D: بيتدخل في الطلب لحظيًا",
+        },
+        {
+          id: 2,
+          level: 1,
+          q: "إيه الفرق بين الـ Backend والـ Gateway؟",
+          opts: [
+            "الـ Gateway بيدير المستخدمين والتقارير والسياسات، والـ Backend بيستقبل ترافيك الزوار ويقرر مصيره.",
+            "الـ Gateway بيستقبل ترافيك الزوار ويقرر، والـ Backend بيستقبل الترافيك كمان كاحتياطي لو الـ Gateway وقع.",
+            "الـ Gateway هو الحارس اللي بيستقبل ترافيك الزوار ويقرر ALLOW/LIMIT/BLOCK، والـ Backend هو العقل الإداري (مستخدمين، شركات، سياسات، أحداث، إشعارات) وما بيستقبلش ترافيك الزوار.",
+            "الـ Gateway بيقرر ويدير المستخدمين والتقارير مع بعض، والـ Backend وظيفته تخزين البيانات في PostgreSQL بس.",
+          ],
+          ans: 2,
+          note: "B: الباك ما بيستقبلش ترافيك الزوار. D: الباك هو العقل الإداري مش مجرد تخزين",
+        },
+        {
+          id: 3,
+          level: 1,
+          q: "إيه دور الـ Frontend (React) في المشروع؟",
+          opts: [
+            "بيعرض بيانات بيطلبها من الـ Backend (REST عبر Axios) وبيستقبل الأحداث اللحظية من Socket.IO، وما بيحميش ولا بيقرر أي حاجة.",
+            "بيتحقق من كل طلب زائر ويحظر المشبوه في المتصفح قبل ما يوصل للسيرفر.",
+            "بيكلم الـ Gateway مباشرة عشان يجيب قرارات الحظر ويعرضها.",
+            "بيحسب الـ Risk Score في المتصفح ويبعته للـ Backend يخزنه.",
+          ],
+          ans: 0,
+          note: "الـ Frontend ما بيحميش، بيعرض بس",
+        },
+        {
+          id: 4,
+          level: 1,
+          q: "Docker Compose بيعمل إيه في المشروع؟",
+          opts: [
+            "بيحط كل الخدمات (frontend وbackend وgateway وai-service وقاعدة البيانات) جوه Container واحد عشان التشغيل يبقى أسهل.",
+            "الشركة العميلة هي اللي تنزّل Docker وتشغّل الـ Gateway على سيرفرها الخاص في النسخة الحالية (MVP).",
+            "Docker بيعوّض Ubuntu Server، فمفيش داعي لسيرفر Linux.",
+            "بيغلّف كل خدمة (frontend, backend, gateway, ai-service, postgres, redis, nginx) في Container منفصل بتتواصل عبر شبكة داخلية، والنظام كله بيشتغل بأمر واحد على أي سيرفر.",
+          ],
+          ans: 3,
+          note: "A: كل خدمة Container منفصل. B: الشركة ما بتنزلش حاجة. C: Docker يشتغل على Ubuntu",
+        },
+        {
+          id: 5,
+          level: 2,
+          q: "إيه دور Gemini API؟",
+          opts: [
+            "بيراجع قرار الحظر في الآخر ويقدر يلغيه لو شاف إنه غلط.",
+            "بيتنادى مع كل طلب كإشارة إضافية في الـ Risk Score.",
+            "ما بيدخلش مسار القرار نهائيًا؛ بيتنادى بعد وقوع الحدث عشان يصيغ تقرير أو إشعار بلغة بشرية مفهومة.",
+            "بيدرّب موديل الـ AI على الترافيك الجديد كل ليلة.",
+          ],
+          ans: 2,
+          note: "Gemini بعد الحدث ولا بيقرر ولا بيدرّب",
+        },
+        {
+          id: 6,
+          level: 2,
+          q: "ليه بنستخدم Redis جنب PostgreSQL؟",
+          opts: [
+            "Redis بيشيل عدّادات الطلبات اللحظية (كام طلب من الـ IP ده في آخر دقيقة) بسرعة عشان ما نكتبش في قاعدة البيانات مع كل طلب، وPostgreSQL هو الذاكرة الدائمة (مستخدمين، سيرفرات، أحداث، سمعة).",
+            "Redis هو التخزين الأساسي للمستخدمين والسيرفرات، وPostgreSQL بنستخدمه كنسخة احتياطية.",
+            "Redis بيشغّل موديل الـ AI، وPostgreSQL بيخزن نتايجه بس.",
+            "الاتنين بيخزنوا نفس البيانات، والفرق إن Redis أسرع فبنقرأ منه بس.",
+          ],
+          ans: 0,
+          note: "B وD بيعكسوا أدوار الاتنين",
+        },
+        {
+          id: 7,
+          level: 2,
+          q: 'إيه هو هجوم "الستار الدخاني" (Smokescreen)؟',
+          opts: [
+            "هجوم بيخفي الـ IP الحقيقي للمهاجم عبر شبكة Tor عشان ما يتحظرش.",
+            "هجوم DDoS صغير بيتعمل لتجربة قوة الحماية قبل الهجوم الكبير.",
+            "هجوم بيستخدم Smart TVs وكاميرات (إنترنت الأشياء) كبوت نت ضخم.",
+            "هجوم DDoS بيتعمل كإلهاء: فريق الأمن ينشغل بوقف الفيضان، وفي الخلفية المهاجم يحاول اختراق حقيقي (SQL Injection أو Brute Force)، وعشان كده بنحتفظ بسجل كامل بالأحداث للمراجعة.",
+          ],
+          ans: 3,
+          note: "C ده وصف بوت نت إنترنت الأشياء (Mirai) مش الستار الدخاني",
+        },
+        {
+          id: 8,
+          level: 2,
+          q: "شركة سجلت وعايزة تضيف سيرفرها. إيه الخطوات الصح؟",
+          opts: [
+            "تضيف الدومين وIP السيرفر، وبعدين توجّه الدومين لينا بـ CNAME/A، وبعدين تثبت الملكية بسجل TXT.",
+            "تضيف الدومين وIP السيرفر الأصلي والمنفذ، وتضيف سجل TXT لإثبات الملكية وتتحقق منه، وبعدين توجّه الدومين للـ Gateway بـ CNAME أو A وتتحقق من التوجيه، وبعدها الترافيك الحقيقي يبدأ يعدي علينا.",
+            "تضيف الدومين فقط، والباك بيكتشف الـ IP الأصلي تلقائيًا ويعدّل الـ DNS بدالها.",
+            "تضيف السيرفر وتنزّل برنامج الـ Gateway بتاعنا على سيرفرها، وبعدين تضيف TXT اختياري.",
+          ],
+          ans: 1,
+          note: "A: الترتيب مقلوب (الملكية قبل التوجيه). C: مفيش تعديل DNS تلقائي",
+        },
+        {
+          id: 9,
+          level: 2,
+          q: "إيه الترتيب الصح لرحلة الطلب الواحد؟",
+          opts: [
+            "Nginx ← Gateway يجمع الإشارات ← Detection ← فحص السمعة/التاريخ ← AI (anomaly score) ← Risk Engine ← Policy Engine ← تسجيل الحدث وتحديث الـ Dashboard",
+            "Nginx ← Gateway ← Policy Engine ← Risk Engine ← AI ← تسجيل الحدث",
+            "Gateway ← Nginx ← Detection ← AI ← Risk ← Policy ← Gemini يقرر",
+            "Nginx ← Gateway ← Detection ← Risk Engine ← AI ← Policy (الـ AI بيعدّل القرار النهائي بعد الـ Policy)",
+          ],
+          ans: 0,
+          note: "الـ Policy آخر قرار، والـ AI قبل الـ Risk",
+        },
+        {
+          id: 10,
+          level: 3,
+          q: "ليه لازم نتحقق من ملكية الدومين بسجل TXT قبل ما نوجّه الترافيك؟",
+          opts: [
+            "لأن Nginx محتاج السجل ده عشان يطلّع شهادة HTTPS للدومين.",
+            "عشان نعرف سعة السيرفر (CPU وRAM) قبل ما نبدأ الحماية.",
+            "عشان نتأكد إن الـ IP الأصلي شغال وبيرد.",
+            "لأن الدومين unique في النظام كله، ومن غير إثبات ملكية أي شركة تقدر تسجّل دومين شركة تانية وتحط الـ Origin بتاعها، فترافيك الضحية يتحول لسيرفرها.",
+          ],
+          ans: 3,
+          note: "الخطر: شركة تسجّل دومين غيرها (الدومين unique عالميًا)",
+        },
+        {
+          id: 11,
+          level: 3,
+          q: "بعد ما الشركة وجّهت الدومين لينا، إيه الشرط المعماري الأساسي على سيرفرها الأصلي؟",
+          opts: [
+            "تسيبه مفتوح للعامة عشان لو الـ Gateway وقع الزوار يدخلوا مباشرة.",
+            "تخبّي الـ IP الأصلي في الكود بس، ومفيش حاجة تانية مطلوبة.",
+            "يتقفل بحيث يقبل ترافيك من عناوين الـ Gateway بس؛ لو الـ IP الأصلي معروف للمهاجم هيهاجمه مباشرة ويتخطى الحماية بالكامل.",
+            "تغيّر منفذه لـ 22 عشان ما يتلقاهوش.",
+          ],
+          ans: 2,
+          note: "لو الـ Origin مفتوح المهاجم يتخطى الحماية",
+        },
+        {
+          id: 12,
+          level: 3,
+          q: "في الأقسام التسعة للفحص المتدرج، مين بيستخدم بصمة TLS (JA3/JA4) ولمين؟",
+          opts: [
+            "Baseline Verifier (القسم 2): بيستخدم JA3/JA4 مع كل زائر جديد عشان أدق.",
+            "Similarity Matcher (القسم 4): بيقارن 10 عناصر تشمل بصمة TLS لكل طلب.",
+            "Traffic Orchestrator (القسم 7): بيستخدم بصمة TLS عشان يقرر الحظر.",
+            "Fingerprint Authenticator (القسم 6): بيستخدمها للأجهزة ذات السمعة السيئة فقط، لأنها الأدق ونستخدمها بس لمن يستحقها.",
+          ],
+          ans: 3,
+          note: "A: Baseline بيستخدم JS + IP scanner. B: Similarity بيقارن 3 عناصر مش 10",
+        },
+        {
+          id: 13,
+          level: 3,
+          q: "إيه اللي بيميّز الـ AI Service عندنا؟",
+          opts: [
+            "الموديل بيتدرّب مرة واحدة أوفلاين على بيانات كبيرة وبعدها بيتجمد عشان يفضل ثابت ومفهوم.",
+            "خدمة Python/FastAPI منفصلة بتستخدم River (Online Learning): كل طلب جديد بيحدّث الموديل تدريجيًا من غير إعادة تدريب كاملة، فيتعلم الترافيك الطبيعي لكل شركة بشكل أدق مع الوقت، وهو Anomaly Detection خفيف مش شبكة عصبية ضخمة.",
+            "شبكة عصبية عميقة بتتعلم لوحدها من غير رقابة وبتقرر الحظر مباشرة.",
+            "بيتدرّب على ترافيك كل الشركات مع بعض ببياناتها الخام عشان يبقى أدق.",
+          ],
+          ans: 1,
+          note: "A: موديل متجمد، C: مش NN ضخمة وما بيقررش لوحده، D: بيانات الشركات معزولة",
+        },
+        {
+          id: 14,
+          level: 4,
+          q: "زائر جديد فشل في اختبار JS الأساسي. إيه اللي يحصل في تصميمنا؟",
+          opts: [
+            "ما يتحظرش فورًا: بيتصعّد للاختبارات المتقدمة (بصمة TLS أو تحديد صارم)، والحظر المؤقت بيجي لو الفشل اتكرر لحد autoBanAfterFails حسب سياسة الشركة.",
+            "بيتحظر حظر دائم فورًا لأن البوت الحقيقي بس هو اللي يفشل.",
+            "بيعدي عادي لأن الاختبار مجرد إشارة ولا يغيّر القرار.",
+            "بيتبعت لـ Gemini يقرر هل يتحظر ولا لأ.",
+          ],
+          ans: 0,
+          note: "الفشل الأول بيصعّد مش بيحظر فورًا (عشان الإيجابيات الكاذبة)",
+        },
+        {
+          id: 15,
+          level: 4,
+          q: "ليه الـ AI مش بيقرر الحظر لوحده؟",
+          opts: [
+            "لأن الـ AI بطيء، فبنتجاهله ونعتمد على القواعد بس.",
+            "لأن الـ AI بيشتغل بعد الحدث بس زي Gemini.",
+            "عشان القرار يفضل مفهوم وقابل للتفسير والتحكم من فريق الأمن؛ الـ AI مكوّن واحد في الـ Risk، ولو هو السبب الوحيد لتجاوز حد الحظر القرار بينزل لاختبار إضافي بدل الحظر.",
+            "لأن الـ AI بيقدر يحظر بس لو الـ IP من Data Center.",
+          ],
+          ans: 2,
+          note: 'قاعدة "الـ AI وحده ما يحظرش" (الدوسيه 7.1)',
+        },
+        {
+          id: 16,
+          level: 4,
+          q: "الـ Gateway بيعرف الطلب ده تابع لأنهي شركة إزاي؟",
+          opts: [
+            "من الـ JWT اللي الزائر بيبعته مع الطلب، فيه organizationId.",
+            "من الدومين (Host header) اللي الزائر فتحه: بيسأل الباك مين صاحبه (Server.domain unique) فيرجّع السيرفر والـ organizationId، وما يمرّرش ترافيك لسيرفر dnsVerified=false.",
+            "من organizationId بيتبعت في الـ query string من الزائر.",
+            "من الـ IP بتاع الزائر، لأن كل شركة ليها نطاق IP معروف.",
+          ],
+          ans: 1,
+          note: "A وC: الزائر ما يقدرش يحدد الشركة، الدومين هو اللي يحدد",
+        },
+        {
+          id: 17,
+          level: 4,
+          q: "إزاي المشروع بيعزل بيانات الشركات عن بعض؟",
+          opts: [
+            "كل شركة ليها قاعدة بيانات PostgreSQL منفصلة، فمفيش أي احتمال تسرّب.",
+            "كل سجل مربوط بـ organizationId، ولو هجوم اتأكد عند شركة، السجل الكامل للمهاجم بيتشارك مع باقي الشركات عشان تتحصّن.",
+            "العزل بيتعمل في Nginx بس: كل شركة ليها مسار منفصل.",
+            "كل سجل مربوط بـ organizationId والباك بياخده من JWT (مش من اللي المستخدم يكتبه)؛ والحاجة الوحيدة اللي بتعدّي الحدود في التصميم هي بصمة التهديد المجردة (JA3/JA4 + تصنيف + ثقة) بعد تأكد حدث سيء، من غير أي بيانات شركة.",
+          ],
+          ans: 3,
+          note: "A: قاعدة بيانات واحدة بـ organizationId. B: بيتشارك مؤشر مجرد مش السجل الكامل",
+        },
+        {
+          id: 18,
+          level: 4,
+          q: "إيه الفرق بين الحد الناعم (Soft) والحد الصارم (Hard) للطلبات؟",
+          opts: [
+            "الناعم (rateLimitRequests) بيتطبق لما الخطورة في نطاق المراقبة/تحديد المعدل ويرجّع 429 عند التجاوز؛ أما الصارم (maxRequestsPerIp) فبيتطبق على أي IP حتى لو خطورته قليلة، وعند تجاوزه بيحظر مؤقتًا لو banOnMaxRequests مفعّل.",
+            "الاتنين نفس الشيء بس باسمين، والشركة تختار واحد.",
+            "الصارم بيتطبق للأجهزة الموثوقة بس، والناعم لكل الباقي.",
+            "الناعم بيحظر دايمًا، والصارم بيرجّع 429 بس.",
+          ],
+          ans: 0,
+          note: "C: الموثوقين بيعدّوا من الاتنين. D: مقلوبة",
+        },
+        {
+          id: 19,
+          level: 5,
+          q: 'إزاي نظام السمعة "ذكي" بدل ما يزوّد +1 كل مرة؟',
+          opts: [
+            "الـ Gateway بيحسب النقاط ويبعت الدرجة النهائية للباك، وكل دليل بيزوّد +1 ثابتة، والسمعة ما بتنزلش.",
+            "الـ Gateway بيبعت أدلة (نوعها وخطورتها وتأكدها وتكرارها) والباك هو اللي يحسب النقاط ويطبق سياسة الشركة؛ سقف الزيادة في التقرير الواحد +5 فمحدش يقفز من 1 لـ 10 بدليل واحد، والمعتدي المتكرر بياخد نقاط أكتر، والسمعة بتنزل مع الوقت من غير أدلة سلبية.",
+            "الباك بيحسب النقاط بس كل الأدلة بتتحسب بنفس الوزن، فالدليل الخفيف زي الخطير.",
+            "كل زائر جديد بيتعمله سجل سمعة فورًا بدرجة 1 عشان نقدر نقارن بيه بعدين.",
+          ],
+          ans: 1,
+          note: "A: الباك هو اللي بيحسب. C: الأوزان مختلفة. D: السجل Lazy (بيتعمل عند دليل سلبي بس)",
+        },
+        {
+          id: 20,
+          level: 5,
+          q: "ليه التصريح (pass token) مش بيعفي صاحبه من الحد الصارم ولا من الخطورة العالية؟",
+          opts: [
+            "لأن التصريح بيخلص بعد كل طلب فمفيش حاجة تحميه.",
+            "لأن الاختبار بياخد وقت فالتصريح مش موثوق أصلًا.",
+            "لأن التصريح بيثبت إنه عدى اختبار مرة، مش إن سلوكه سليم بعد كده؛ بوت ممكن يحل الاختبار مرة ويحصل على تصريح ثم يغرق السيرفر، فالحد الصارم والخطورة العالية لسه بيتطبقوا.",
+            "لأن التصريح بيتخزن في Redis وممكن يتمسح في أي وقت.",
+          ],
+          ans: 2,
+          note: "التصريح دليل نجاح مرة واحدة مش حصانة",
+        },
+      ];
+
+      const TF = [
+        {
+          id: 1,
+          q: "الـ Backend في Zero Plus هو اللي بيستقبل ترافيك الزوار العاديين من الإنترنت ويفحصه، وبعدها يمرّره لسيرفر الشركة لو الطلب سليم.",
+          ans: false,
+          note: "ده شغل الـ Gateway. الـ Backend للإدارة بس (مستخدمين، تقارير، سياسات) ومبيستقبلش ترافيك الزوار",
+        },
+        {
+          id: 2,
+          q: "Docker Compose بيخلّيك تشغّل خدمات كتير (زي PostgreSQL وRedis) بأمر واحد. كل خدمة شغالة في حاوية معزولة، وبرضه تقدر تكلم التانية بالاسم جوه الشبكة الداخلية.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 3,
+          q: "في نسخة الـ SaaS، الشركة بتسجّل حساب، وتضيف سيرفرها (Domain + IP + Port)، وتغيّر إعدادات الـ DNS. لكنها كمان لازم تنزّل Docker على سيرفرها عشان الحماية تشتغل.",
+          ans: false,
+          note: "الشركة مش بتنزّل حاجة في SaaS، هي بتستخدم المتصفح وتغيّر الـ DNS بس",
+        },
+        {
+          id: 4,
+          q: "Redis بيخزّن عدّادات الطلبات اللحظية في الذاكرة عشان سرعته. أما المستخدمين والأحداث والسمعة فبتتحفظ بشكل دائم في PostgreSQL.",
+          ans: true,
+          note: "Redis للعدّادات السريعة المؤقتة، PostgreSQL للتخزين الدائم",
+        },
+        {
+          id: 5,
+          q: "اختبار الـ JS في Zero Plus بيتنفذ تلقائياً جوه المتصفح الحقيقي من غير ما المستخدم يحس بحاجة. والبوتات البسيطة بتفشل فيه لأنها غالباً مش بتشغّل JavaScript.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 6,
+          q: "قرار حظر أي جهاز بيتاخد بواسطة Gemini لأنه أذكى من موديل River في تحليل الطلبات، وبعدها الـ Gateway بينفّذ قراره.",
+          ans: false,
+          note: "Gemini مبيدخلش مسار القرار الأمني خالص. القرار كله بيتاخد محلياً، وGemini بيكتب التقارير بعد الحدث",
+        },
+        {
+          id: 7,
+          q: "مبدأ Lazy Registration معناه إن أي جهاز بيزور الموقع لأول مرة بيتسجل في قاعدة البيانات بسمعة 1، عشان نقدر نتابعه من البداية.",
+          ans: false,
+          note: "العكس هو الصح: التسجيل بس عند حدث سيء (فشل اختبار أو IP مشبوه)، عشان القاعدة متتملاش بسجلات فاضية",
+        },
+        {
+          id: 8,
+          q: "الجهاز غير المسجل في نظام السمعة بيتعامل معاه النظام كأفضل حالة ممكنة لأنه معندوش تاريخ سيء. لكن ده مش معناه إنه بيعدي من غير فحص: لسه بيتبعتله اختبار JS خفيف وفحص نوع الـ IP.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 9,
+          q: "هجوم Mirai سنة 2016 وقّع Twitter وNetflix لأنه ضرب سيرفراتهم مباشرة بمعدل أكبر من أي هجوم قبله، باستخدام كمبيوترات مخترقة.",
+          ans: false,
+          note: "Mirai ضرب Dyn (مزوّد DNS) مش سيرفرات Twitter مباشرة، واستخدم أجهزة IoT (كاميرات وراوترات بباسوردات افتراضية) مش كمبيوترات",
+        },
+        {
+          id: 10,
+          q: "سيرفر الشركة الحقيقي لازم يتقفل عن الوصول المباشر من الإنترنت ويسمح بالاتصال من Zero Plus بس. وإلا أي مهاجم يعرف الـ IP الحقيقي يقدر يتخطى الحماية كلها.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 11,
+          q: "حوالي 89% من الهجمات الحالية بتستمر أقل من 10 دقايق. وده بيوضح ليه الفحص السريع (بالمللي ثانية) أهم من أي تحليل بطيء بياخد ثواني.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 12,
+          q: "موديل River بيتعلم بـ learn_one مع كل طلب. لكن لو الـ AI Service اتقفل من غير ما نحفظ حالة الموديل (بـ pickle مثلاً)، كل اللي اتعلمه بيضيع.",
+          ans: true,
+          note: "الموديل object في الـ RAM، من غير حفظ يدوي بيضيع",
+        },
+        {
+          id: 13,
+          q: "استخدام موديل واحد مشترك لكل الشركات أفضل من موديل منفصل لكل شركة، لأنه بيشوف بيانات أكتر فبيتعلم أسرع ويبقى أدق.",
+          ans: false,
+          note: 'كل شركة ليها موديل منفصل لأن "الطبيعي" بيختلف بالحجم: 1000 طلب/دقيقة عادي لموقع كبير وهجوم لموقع صغير',
+        },
+        {
+          id: 14,
+          q: "الـ Risk Score بيتجمع من إشارات متعددة (سمعة IP، معدل طلبات، شذوذ AI، بصمة، تاريخ). بعدها الـ Policy Engine بيحوّله لقرار بحدود قابلة للتعديل لكل شركة، يعني شركتين ممكن ياخدوا قرارين مختلفين لنفس الـ Risk Score.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 15,
+          q: "نظام السمعة بيتدرج من 1 (أفضل حالة مسجلة) لـ 10 (أسوأ حالة). والجهاز اللي بيوصل لـ 9 أو 10 بيتضاف للبلاك ليست الدائمة.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 16,
+          q: "ملف api.ts بيقرا الـ Token مباشرة من localStorage بنفس مفتاح Zustand persist. وعند استلام 401 بيبعت Custom Event بدل ما يستدعي logout() من الـ Store، عشان نتجنب Circular Import.",
+          ans: true,
+          note: "",
+        },
+        {
+          id: 17,
+          q: "في المناعة الجماعية، لما شركة A تتعرض لهجوم، شركة B بتتحصن لأنها بتشوف سجلات الأحداث الكاملة لشركة A، بس مش بتقدر تعدّل فيها.",
+          ans: false,
+          note: "بيتشارك بصمة الجهاز المهاجم المجردة بس (مؤشر + تصنيف + ثقة)، مش سجلات ولا بيانات الشركة",
+        },
+        {
+          id: 18,
+          q: "لما جهاز يتحظر مؤقتاً لمدة ساعتين، بعد انتهاء المدة سمعته بتتصفّر تلقائياً ويبدأ من جديد زي أي جهاز جديد.",
+          ans: false,
+          note: "سمعته بتفضل متراكمة. الحظر المؤقت بينتهي بس، ولما يحاول تاني بياخد نفس سمعته القديمة",
+        },
+        {
+          id: 19,
+          q: "أكبر هجوم DDoS في التاريخ (ديسمبر 2025) كان 31.4 تيرابت/ثانية ودام 35 ثانية. وبوت نت Aisuru-Kimwolf اللي وراه كان مبني أساساً على كاميرات مراقبة مخترقة.",
+          ans: false,
+          note: "كان أجهزة تلفزيون Android ذكية مخترقة، مش كاميرات مراقبة",
+        },
+        {
+          id: 20,
+          q: "الـ AI المحلي بياخد القرار اللحظي لأنه شغال جوه نفس السيرفر فبيرد في أجزاء من الملي ثانية. أما Gemini فبيحتاج رحلة إنترنت، فبيتاخد منه التقارير بعد الحدث بس، حتى لو كان أذكى لغوياً.",
+          ans: true,
+          note: "",
+        },
+      ];
+
+      /* Mixed questions - simplified for practicality: multi-select, matching, ordering represented as MCQ-style where possible, with full support for multi and order */
+      const MIXED = [
+        {
+          id: 1,
+          type: "multi",
+          q: "ليه المشروع فاصل بين jwt.plugin و gateway-auth.plugin؟ (حدد كل الصحيح)",
+          opts: [
+            "عشان الـ Dashboard والـ Gateway مختلفين في طريقة إثبات الهوية",
+            "عشان الـ Gateway مش مستخدم بشري ومعندوش email وpassword",
+            "عشان الـ Gateway لازم يمر على Login الأول",
+            "عشان توكن الـ JWT ممكن يتسرب فنحتاج وسيلة تانية بدون role/organization",
+            "عشان المفتاح السري بتاع الـ Gateway ثابت وبيتقارن بدل ما يتفك توكن",
+          ],
+          ans: [0, 1, 4],
+          note: "الـ Dashboard والـ Gateway مختلفين في طريقة إثبات الهوية، والـ Gateway مش مستخدم بشري، والمفتاح السري ثابت وبيتقارن.",
+        },
+        {
+          id: 2,
+          type: "order",
+          q: "رتب رحلة زائر عادي لموقع عميل محمي بـ Zero Plus (من الأول للآخر):",
+          items: [
+            "الـ Gateway يستقبل الطلب على Host معين",
+            "الـ Gateway يسأل الباك عن السيرفر والشركة والـ Policy بالـ Host",
+            "الباك يرجّع الـ Policy ونسختها",
+            "الـ Gateway يطبق القواعد على الزائر (سماح / تحدي / حظر)",
+            "لو سُمح للزائر، الطلب يتوجه للـ Origin بتاع العميل",
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "الترتيب الصحيح: استقبال ← سؤال الباك ← رجوع Policy ← تطبيق القواعد ← توجيه للـ Origin",
+        },
+        {
+          id: 3,
+          type: "match",
+          q: "وصّل كل مكوّن بدوره:",
+          left: [
+            "Prisma plugin",
+            "JWT plugin",
+            "Gateway-auth plugin",
+            "Zod schema",
+          ],
+          right: [
+            "يعطي كل الـ routes اتصال بقاعدة البيانات",
+            "يتأكد إن المستخدم صاحب توكن صالح وله دور مناسب",
+            "يتأكد إن اللي بيطلب هو الـ Gateway نفسه",
+            "يتحقق إن البيانات الداخلة بالشكل والمدى الصح قبل أي منطق",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "Prisma → DB، JWT → مستخدم، Gateway-auth → Gateway، Zod → validation",
+        },
+        {
+          id: 4,
+          type: "multi",
+          q: "ليه organizationId بيتاخد من الـ JWT فقط مش من body أو query؟",
+          opts: [
+            "عشان مستخدم من شركة ما يقدرش يقرأ أو يعدل بيانات شركة تانية",
+            "عشان الـ body أصلًا ممنوع فيه أي حقول",
+            "عشان التوكن موقّع من السيرفر فمش ممكن العميل يغيّره",
+            "عشان يتحقق عزل بيانات الشركات (multi-tenancy)",
+            "عشان Zod مش بيعرف يتحقق من UUID",
+          ],
+          ans: [0, 2, 3],
+          note: "عزل الشركات + التوكن موقّع مش ممكن يتغير",
+        },
+        {
+          id: 5,
+          type: "match",
+          q: "وصّل كل دور بقدرته:",
+          left: ["OWNER / ADMIN", "ANALYST", "VIEWER"],
+          right: [
+            "يعدل السيرفرات والـ Policy",
+            "يعدل الـ Policy بس مش السيرفرات",
+            "يشوف كل حاجة بس مش بيعدل شيء",
+          ],
+          ans: [0, 1, 2],
+          note: "OWNER/ADMIN يعدل كل حاجة، ANALYST Policy بس، VIEWER مشاهدة فقط",
+        },
+        {
+          id: 6,
+          type: "order",
+          q: "رتب خطوات signup الداخلية:",
+          items: [
+            "التأكد إن الإيميل مش مستخدم",
+            "توليد slug للشركة والتأكد إنه فريد",
+            "تشفير كلمة المرور",
+            "إنشاء الشركة والمستخدم OWNER والـ Policy في Transaction واحدة",
+            "إصدار توكن JWT وإرجاعه مع بيانات المستخدم والشركة",
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "فحص إيميل ← slug ← تشفير ← Transaction ← JWT",
+        },
+        {
+          id: 7,
+          type: "multi",
+          q: "إيه الفايدة من استخدام Transaction في signup؟",
+          opts: [
+            "لو إنشاء الـ Policy فشل، مفيش شركة أو مستخدم يفضلوا موجودين ناقصين",
+            "بتخلي bcrypt أسرع",
+            "بتضمن إن العملية كلها تنجح أو كلها تتلغي",
+            "بتمنع تكرار الإيميل نهائيًا من غير فحص",
+            "بتمنع حالة شركة من غير Policy",
+          ],
+          ans: [0, 2, 4],
+          note: "Atomicity + منع حالات ناقصة",
+        },
+        {
+          id: 8,
+          type: "match",
+          q: "وصّل كل مدخل في signup بمصيره:",
+          left: ["organizationName", "fullName", "email", "password"],
+          right: [
+            "يتحول لـ slug ويتخزن اسم الشركة",
+            "اسم المستخدم المعروض",
+            "يتحول lowercase ويستخدم لتسجيل الدخول",
+            "يتخزن كـ hash فقط",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "name→slug، fullName→عرض، email→lowercase، password→hash",
+        },
+        {
+          id: 9,
+          type: "multi",
+          q: 'في login عند فشل الدخول، ليه الرسالة "Invalid email or password" موحدة؟',
+          opts: [
+            "عشان المهاجم ما يعرفش هل الإيميل مسجل عندنا ولا لأ",
+            "عشان الكود قصير",
+            "عشان تقليل تسريب المعلومات (user enumeration)",
+            "عشان bcrypt مش بيفرق",
+            "حماية للخصوصية",
+          ],
+          ans: [0, 2, 4],
+          note: "منع user enumeration + خصوصية",
+        },
+        {
+          id: 10,
+          type: "order",
+          q: "رتب فحوصات login:",
+          items: [
+            "البحث عن المستخدم بالإيميل (مع الشركة)",
+            "هل حساب المستخدم مفعّل؟",
+            "هل الشركة مفعّلة؟",
+            "مقارنة الباسورد بالـ hash",
+            "تحديث lastLoginAt وإصدار التوكن",
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "بحث ← user active ← org active ← password ← token",
+        },
+        {
+          id: 11,
+          type: "multi",
+          q: "العميل بعد ما ياخد التوكن من login، المفروض يعمل إيه؟",
+          opts: [
+            "يخزنه ويبعته في كل طلب محمي (Authorization: Bearer)",
+            "يبعت organizationId مع كل طلب",
+            "يستخدم بيانات user وorganization في الرد لعرض الواجهة",
+            "يعتمد على /auth/me لجلب بيانات أحدث وقت الحاجة",
+            "يفك التوكن ويعدل الدور بنفسه",
+          ],
+          ans: [0, 2, 3],
+          note: "Bearer + عرض بيانات + /auth/me",
+        },
+        {
+          id: 12,
+          type: "multi",
+          q: "إيه الفرق بين .strict() في schema الـ signup وبين عدم وجودها؟",
+          opts: [
+            "بترفض أي حقل زيادة بدل ما تتجاهله بصمت",
+            'بتمنع محاولة إرسال حقل مثل role: "ADMIN"',
+            "بتخلي كل الحقول اختيارية",
+            "بتخلي الطلب 400 لو في حقل مش معروف",
+            "بتغير شكل الرد",
+          ],
+          ans: [0, 1, 3],
+          note: "strict يرفض الحقول الزيادة ويرجع 400",
+        },
+        {
+          id: 13,
+          type: "match",
+          q: "وصّل كل endpoint بغرضه:",
+          left: [
+            "POST /servers",
+            "POST /servers/:id/verify",
+            "POST /servers/:id/maintenance",
+            "GET /servers/:id/dns",
+          ],
+          right: [
+            "يسجل الدومين والـ Origin ويرجّع تعليمات DNS",
+            "يفحص ملكية الدومين وتوجيهه للـ Gateway",
+            "يشغل أو يوقف وضع الصيانة",
+            "يرجّع تعليمات الـ DNS المطلوب من العميل يضيفها مع حالة التحقق",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "create → verify → maintenance → dns info",
+        },
+        {
+          id: 14,
+          type: "match",
+          q: "وصّل كل بيان العميل بيدخله في إنشاء السيرفر بمعناه:",
+          left: ["domain", "originIp", "originPort", "mode"],
+          right: [
+            "الموقع اللي هيتحمي ويستقبل الزوار",
+            "عنوان السيرفر الحقيقي اللي الـ Gateway بيحول له الطلبات",
+            "المنفذ اللي بيشتغل عليه سيرفر العميل الحقيقي",
+            "حماية فعلية (PROTECT) أو مراقبة بدون حظر (MONITOR_ONLY)",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "domain=موقع، originIp=IP حقيقي، port=منفذ، mode=PROTECT/MONITOR",
+        },
+        {
+          id: 15,
+          type: "order",
+          q: "رتب ما يجب على العميل فعله بعد إنشاء سيرفر جديد:",
+          items: [
+            "يستقبل الرد (بيانات السيرفر + تعليمات DNS)",
+            "يضيف سجل TXT عند مزود الدومين لإثبات الملكية",
+            "يضغط verify لإثبات الملكية",
+            "يوجّه الدومين للـ Gateway",
+            "يضغط verify تاني ليتأكد من التوجيه",
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "رد ← TXT ← verify ملكية ← توجيه ← verify توجيه",
+        },
+        {
+          id: 16,
+          type: "multi",
+          q: "ليه فيه خطوتين للتحقق (ownership و routing) بدل خطوة واحدة؟",
+          opts: [
+            "إثبات الملكية بيثبت إن العميل هو صاحب الدومين فعلًا",
+            "التوجيه بيثبت إن الترافيك فعلًا بيعدي من الـ Gateway",
+            "ممكن عميل يملك الدومين بس لسه موجهوش",
+            "عشان نقدر نقول للعميل بالظبط هو واقف فين (رسالة مختلفة لكل حالة)",
+            "لأن الخطوتين دايمًا بيحصلوا في نفس اللحظة",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "ملكية + توجيه منفصلة + رسائل واضحة",
+        },
+        {
+          id: 17,
+          type: "multi",
+          q: "لما العميل يعدل domain السيرفر (PATCH)، إيه اللي بيحصل منطقيًا؟",
+          opts: [
+            "التحقق القديم ما يبقاش صالح لأن الملكية كانت للدومين القديم",
+            "الرد بيرجع dns جديد بسجل TXT جديد",
+            "لازم العميل يعيد التحقق",
+            "السيرفر بيتحذف تلقائيًا",
+            "الرد بيحتوي changes و resets توضح إيه اتغير وإيه اتصفّر",
+          ],
+          ans: [0, 1, 2, 4],
+          note: "إعادة تحقق + TXT جديد + changes/resets",
+        },
+        {
+          id: 18,
+          type: "multi",
+          q: "ليه الحذف بيحتاج confirmDomain؟",
+          opts: [
+            "عشان يمنع حذف بالغلط لأن العملية مدمّرة (بتحذف الأحداث والسجلات Cascade)",
+            "عشان العميل يكتب اسم الدومين بنفسه كتأكيد واعي",
+            "عشان الـ Zod محتاجه",
+            "زي ما GitHub بيطلب كتابة اسم الريبو قبل الحذف",
+            "عشان نعرف الدومين بعد الحذف",
+          ],
+          ans: [0, 1, 3],
+          note: "حماية من الحذف بالغلط + تأكيد واعي",
+        },
+        {
+          id: 19,
+          type: "match",
+          q: "وصّل كل حالة بتأثيرها:",
+          left: [
+            "حدث خطأ تحقق بصيغة Zod",
+            "خطأ معروف من Service",
+            "خطأ غير متوقع",
+          ],
+          right: [
+            "400 مع قائمة حقول ورسائلها",
+            "نفس الـ status والـ code المحددين في الخطأ",
+            "500 برسالة عامة بدون تسريب تفاصيل داخلية",
+          ],
+          ans: [0, 1, 2],
+          note: "Zod→400، Service→status محدد، غير متوقع→500",
+        },
+        {
+          id: 20,
+          type: "multi",
+          q: "إيه اللي بيعمله العميل لما يستقبل 429 من verify؟",
+          opts: [
+            "يقرأ Retry-After ويستنى المدة قبل ما يحاول تاني",
+            "يعيد المحاولة فورًا في loop",
+            "يعرض رسالة إن فيه حد للمحاولات المتكررة",
+            "يعتبر السيرفر اتحذف",
+            "يعطّل زر verify مؤقتًا",
+          ],
+          ans: [0, 2, 4],
+          note: "Retry-After + رسالة + تعطيل الزر",
+        },
+        {
+          id: 21,
+          type: "order",
+          q: "رتب تسلسل قرار الـ Gateway حسب الـ Risk Score من الأقل للأعلى:",
+          items: [
+            "ضمن حد allowMaxScore: سماح",
+            "فوقه لحد rateLimitMaxScore: تحديد معدل",
+            "فوقه لحد challengeMaxScore: تحدي",
+            "فوق challengeMaxScore: حظر BLOCK",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "سماح ← تحديد معدل ← تحدي ← حظر",
+        },
+        {
+          id: 22,
+          type: "multi",
+          q: "ليه challengeMaxScore أقصاه 99 مش 100؟",
+          opts: [
+            "عشان منطقة الـ BLOCK ما تختفيش",
+            "لو بقى 100 يبقى كل زائر يتحدى ومفيش حظر أبدًا",
+            "خطأ برمجي",
+            "عشان لازم فيه مدى للحظر فوق التحدي",
+            "لأن Prisma بتحدد كده",
+          ],
+          ans: [0, 1, 3],
+          note: "لازم يبقى فيه منطقة BLOCK فوق التحدي",
+        },
+        {
+          id: 23,
+          type: "match",
+          q: "وصّل كل حقل بوظيفته:",
+          left: [
+            "rateLimitRequests / rateLimitWindowSec",
+            "maxRequestsPerIp / maxRequestsWindowSec",
+            "autoBanAfterFails",
+            "passTokenTtlMinutes",
+          ],
+          right: [
+            "الحد الناعم: تباطؤ الزائر لما يزود",
+            "الحد الصارم: سقف الطلبات للـ IP الواحد (ممكن يحظر)",
+            "عدد مرات فشل الاختبار قبل الحظر التلقائي",
+            'مدة صلاحية "تذكرة المرور" بعد نجاح الاختبار',
+          ],
+          ans: [0, 1, 2, 3],
+          note: "ناعم / صارم / autoBan / passToken",
+        },
+        {
+          id: 24,
+          type: "multi",
+          q: "ليه لازم الحد الصارم ≥ الحد الناعم (بالطلب/ثانية)؟",
+          opts: [
+            "لو الصارم أقل، الزائر يتحظر قبل ما التحديد الناعم يشتغل",
+            "لأن الناعم يفقد معناه لو الحظر بيحصل قبله",
+            "لأن Zod بيحسب RPS بس",
+            "عشان التدرج يكون: تباطؤ ثم حظر",
+            "عشان الأرقام تبقى زوجية",
+          ],
+          ans: [0, 1, 3],
+          note: "التدرج: تباطؤ ثم حظر",
+        },
+        {
+          id: 25,
+          type: "multi",
+          q: "ليه فحص القواعد (findPolicyViolations) بيتطبق مرتين: في Zod وفي الـ Service؟",
+          opts: [
+            "Zod بيفحص الحقول المبعوتة فقط",
+            "الـ Service بيفحص القيم بعد الدمج مع الحالية، فيكتشف تعارض مع قيمة قديمة",
+            "مثال: العميل يبعت allowMaxScore=90 بس، وrateLimitMaxScore الحالي 60",
+            "تكرار لا فايدة منه",
+            "الفحص الكامل لازم يكون على الصورة النهائية",
+          ],
+          ans: [0, 1, 2, 4],
+          note: "Zod للحقول الجديدة، Service للصورة النهائية بعد الدمج",
+        },
+        {
+          id: 26,
+          type: "match",
+          q: "وصّل كل endpoint للـ Gateway بحالة استخدامه:",
+          left: [
+            "resolve?host=",
+            "by-server/:serverId",
+            "by-org/:organizationId",
+            "version/:organizationId",
+          ],
+          right: [
+            "الأساسي: من الـ Host يجيب السيرفر والشركة والـ Policy في رد واحد",
+            "لما الـ Gateway يعرف الـ serverId جاهز",
+            "الـ Policy بس من غير بيانات سيرفر",
+            "رد خفيف للتحقق هل الـ Policy اتغيرت",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "resolve أساسي، by-server، by-org، version",
+        },
+        {
+          id: 27,
+          type: "order",
+          q: "رتب سيناريو تحديث الـ Policy على الـ Gateway بأقل تكلفة:",
+          items: [
+            "الـ Gateway معاه نسخة cached من الـ Policy",
+            "يسأل عن version بشكل دوري",
+            "يقارن policyVersion بنسخته",
+            "لو اتغيرت يطلب resolve كامل",
+            "يحدّث الـ cache",
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "cache ← version ← مقارنة ← resolve لو لزم ← تحديث",
+        },
+        {
+          id: 28,
+          type: "multi",
+          q: "ليه ردود الـ Gateway فيها Cache-Control: no-store؟",
+          opts: [
+            "عشان الـ cache بيتم عند الـ Gateway نفسه مش في HTTP",
+            "عشان ما ياخدش نسخة قديمة من وسيط",
+            "عشان يضمن أحدث نسخة",
+            "عشان يوفر bandwidth",
+            "عشان مفيش حد يقدر يرجع للرد تاني",
+          ],
+          ans: [0, 1, 2],
+          note: "cache عند الـ Gateway + أحدث نسخة",
+        },
+        {
+          id: 29,
+          type: "multi",
+          q: "معنى maxServerRps = null؟",
+          opts: [
+            "الشركة ما حددتش سقف خاص",
+            "الـ Gateway يستخدم Server.maxRequestsPerSecond كسقف",
+            "مفيش سقف نهائيًا حتى لو السيرفر محدد",
+            "effectiveMaxServerRps ممكن يطلع null لو الاتنين مش محددين",
+            "الـ Policy باطلة",
+          ],
+          ans: [0, 1, 3],
+          note: "null = استخدم سقف السيرفر أو null",
+        },
+        {
+          id: 30,
+          type: "match",
+          q: "وصّل كل قيمة في رد resolve بما يستفيد منه الـ Gateway:",
+          left: [
+            "server.originIp / originPort",
+            "server.mode",
+            "effectiveMaxServerRps",
+            "policyVersion",
+          ],
+          right: [
+            "يعرف يوجّه الطلب المسموح لفين",
+            "يقرر يحظر فعلًا ولا يراقب بس",
+            "السقف الفعلي لحماية السيرفر من الحمل الزائد",
+            "يقارنها عشان يعرف يحدّث الـ cache",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "origin / mode / maxRps / version",
+        },
+        {
+          id: 31,
+          type: "multi",
+          q: "لو ANALYST حاول يعمل DELETE لسيرفر، إيه اللي يحصل ولماذا؟",
+          opts: [
+            "يتمنع بـ 403 لأن الحذف مقتصر على OWNER/ADMIN",
+            "الطلب يوصل للـ Service ويتحذف",
+            "الفحص بيحصل في preHandler قبل منطق الـ Service",
+            "لأن السيرفر بيأثر على توجيه الترافيك فالتحكم أضيق من الـ Policy",
+            "يتمنع بـ 401",
+          ],
+          ans: [0, 2, 3],
+          note: "403 + preHandler + تحكم أضيق",
+        },
+        {
+          id: 32,
+          type: "order",
+          q: "رتب سلسلة معالجة أي طلب محمي في Dashboard:",
+          items: [
+            "authenticate (التحقق من التوكن)",
+            "requireRole (لو العملية تعديل)",
+            "Zod validation للمدخلات",
+            "Service بالمنطق وقاعدة البيانات",
+            "تحويل الأخطاء لرد HTTP منظم",
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "auth ← role ← Zod ← Service ← error handling",
+        },
+        {
+          id: 33,
+          type: "multi",
+          q: "الفرق بين 401 و403 في المشروع:",
+          opts: [
+            "401 = التوكن ناقص أو غير صالح (مش معروف مين أنت)",
+            "403 = معروف مين أنت بس مش مسموح لك",
+            "نفس الشيء",
+            "الـ Gateway مفتاحه ناقص = 401، مفتاحه غلط = 403",
+            "403 = السيرفر وقع",
+          ],
+          ans: [0, 1, 3],
+          note: "401 غير معروف، 403 معروف لكن ممنوع",
+        },
+        {
+          id: 34,
+          type: "multi",
+          q: "ليه GATEWAY_SECRET أقل من 32 حرف بيوقف السيرفر عند التشغيل؟",
+          opts: [
+            "عشان نكتشف الخطأ من أول لحظة بدل ما الـ Gateway يفضل ياخد أخطاء غامضة",
+            "مفتاح قصير أسهل في التخمين",
+            "الـ Gateway بيشتغل بدون مفتاح",
+            "Fail fast: أي مشكلة أمان تظهر قبل ما النظام يبدأ يخدم",
+            "عشان الـ JWT يحتاجه",
+          ],
+          ans: [0, 1, 3],
+          note: "Fail fast + مفتاح قصير ضعيف",
+        },
+        {
+          id: 35,
+          type: "multi",
+          q: "ليه مقارنة مفتاح الـ Gateway بـ timingSafeEqual مش ===؟",
+          opts: [
+            "المقارنة العادية ممكن توقف عند أول حرف مختلف",
+            "المهاجم ممكن يقيس زمن الرد ويستنتج المفتاح حرفًا حرفًا",
+            "timingSafeEqual أسرع",
+            "المقارنة ثابتة الزمن بغض النظر عن موضع الاختلاف",
+            "لأن المفتاح مشفر",
+          ],
+          ans: [0, 1, 3],
+          note: "منع timing attack",
+        },
+        {
+          id: 36,
+          type: "match",
+          q: "وصّل كل ميزة أمان بالمشكلة اللي بتحلها:",
+          left: [
+            "bcrypt hashing",
+            "timingSafeEqual",
+            "confirmDomain",
+            ".strict()",
+          ],
+          right: [
+            "تسريب الباسورد لو اتسربت قاعدة البيانات",
+            "تسريب المفتاح من توقيت الرد",
+            "الحذف بالغلط",
+            "حقول غير مصرح بها تتمرر بصمت",
+          ],
+          ans: [0, 1, 2, 3],
+          note: "bcrypt / timing / confirm / strict",
+        },
+        {
+          id: 37,
+          type: "multi",
+          q: "لو الشركة غيّرت temporaryBanMinutes من 120 لـ 30، إيه الصحيح؟",
+          opts: [
+            "policyVersion بتتغير لأن updatedAt اتحدّث",
+            "الـ Gateway يكتشف التغيير عن طريق version ويعمل refresh",
+            "رد PATCH فيه changes بالقيمة القديمة والجديدة",
+            "السيرفرات كلها تتحذف",
+            "لازم logout",
+          ],
+          ans: [0, 1, 2],
+          note: "version + refresh + changes",
+        },
+        {
+          id: 38,
+          type: "multi",
+          q: "إيه الغرض من POST /policies/me/reset مع fields؟",
+          opts: [
+            "إرجاع حقول محددة للافتراضي بدون المساس بالباقي",
+            "بدون fields، كل الإعدادات ترجع للافتراضي",
+            "confirm: true شرط عشان ما يحصلش reset بالغلط",
+            "يمسح الشركة",
+            "الافتراضيات من POLICY_DEFAULTS اللي لازم تطابق Prisma",
+          ],
+          ans: [0, 1, 2, 4],
+          note: "reset جزئي أو كامل + confirm + defaults",
+        },
+        {
+          id: 39,
+          type: "order",
+          q: "رتب ما يحصل لما العميل يبعت PATCH على Policy بدون أي تغيير فعلي:",
+          items: [
+            "authenticate و requireRole يعدّوا",
+            "Zod يتأكد إن الحقول سليمة",
+            "الـ Service يقارن القيم المبعوتة بالحالية",
+            "changes تطلع فاضية",
+            'الرد 200 برسالة "لا يوجد تغيير"',
+          ],
+          ans: [0, 1, 2, 3, 4],
+          note: "auth ← Zod ← مقارنة ← فاضي ← 200",
+        },
+        {
+          id: 40,
+          type: "multi",
+          q: "أي من الآتي يوضح فلسفة تصميم المشروع؟",
+          opts: [
+            "كل طبقة ليها مسؤولية واحدة (route / schema / service / plugin)",
+            "الأمان مبني من البداية: عزل شركات، أدوار، تحقق صارم",
+            "الـ Gateway هو المنفذ الفعلي والباك هو المخ المسؤول عن القواعد",
+            "كل حاجة في ملف واحد لتسهيل القراءة",
+            "رسائل الأخطاء منظمة بـ code ثابت عشان الواجهة تتعامل معاها برمجيًا",
+          ],
+          ans: [0, 1, 2, 4],
+          note: "طبقات منفصلة + أمان من البداية + Gateway vs Backend + أكواد خطأ",
+        },
+      ];
+
+      const BLANKS_TEXT = [
+        "مشروع Zero Plus عبارة عن بوابة أمن ذكية بتقف بين زوار الإنترنت وبين السيرفر الحقيقي للشركة.",
+        "الفكرة بتحل مشكلة هجمات (1) ........ اللي بتغرق السيرفر بملايين الطلبات الوهمية لحد ما يقع.",
+        "المهاجم بيعتمد على جيش من الأجهزة المخترقة اسمه (2) ........، وأشهر مثال عليه شبكة (3) ........ سنة 2016 اللي استغلت كاميرات وراوترات بباسوردات افتراضية.",
+        "أول باب بيستقبل الاتصال من الإنترنت هو (4) ........، وبعده الطلب بيروح لـ (5) ........، وده الحارس الفعلي اللي بيفحص كل طلب قبل ما يوصل للسيرفر.",
+        "أما الـ Backend فهو العقل الإداري بس ومبيستقبلش ترافيك الزوار، وبيشتغل بإطار (6) ........، وبيتكلم مع قاعدة البيانات عن طريق (7) .........",
+        "البيانات الدائمة زي المستخدمين والأحداث بتتخزن في (8) ........، أما العدّادات اللحظية للطلبات فبتتحفظ في (9) ........ عشان سرعتها.",
+        "كل الخدمات بتشتغل في حاويات منفصلة بواسطة (10) ........، والمشروع بينتشر على سيرفر (11) ........ Server 24.04.",
+        "الذكاء الاصطناعي المحلي مكتوب بلغة (12) ........، وبيعتمد على مكتبة (13) ........ المتخصصة في التعلم المستمر.",
+        "كل طلب جديد بيمر على الموديل بيتعلم منه فوراً عن طريق دالة (14) ........، وعشان التعلم ما يضيعش لما السيرفر يتقفل، حالته بتتحفظ بمكتبة (15) .........",
+        'ولأن "الطبيعي" بيختلف من موقع لموقع، كل شركة ليها موديل (16) ........ بيتعلم من ترافيكها هي بس.',
+        "النظام بيجمع إشارات متعددة (سمعة الـ IP، معدل الطلبات، شذوذ الـ AI) في رقم واحد اسمه (17) .........",
+        "وبعدها محرك السياسات بيحوله لقرار: سماح، أو تحديد معدل، أو (18) .........",
+        "الجهاز الجديد مبيتسجلش في قاعدة البيانات إلا لو حصل منه حدث سيء، وده مبدأ اسمه (19) ........ Registration.",
+        "وكل جهاز مسجل ليه سمعة من 1 لحد (20) ........، والحظر المؤقت مدته (21) ........، لكن لو السمعة وصلت 9 أو 10 بيدخل البلاك ليست (22) .........",
+        "للأجهزة المشبوهة بس بيتعمل فحص أقوى اسمه بصمة التشفير (23) ........، وبيفضح البرنامج المستخدم حتى لو المهاجم غيّر الـ IP.",
+        "وكمان النظام بيفحص هل الـ IP جاي من (24) ........ Center ولا من بيت عادي.",
+        "وبدل ما نعذب الزوار بـ (25) ........، بنستخدم اختبار JavaScript صامت بيشتغل في المتصفح من غير ما المستخدم يحس.",
+        "الفرونت إند مبني بمكتبة (26) ........، وبيستقبل الأحداث اللحظية من غير تحديث للصفحة عن طريق (27) ........، وحالة تسجيل الدخول محفوظة في (28) .........",
+        "وGemini مبيدخلش في أي قرار أمني نهائياً، دوره بس كتابة (29) ........ بلغة بشرية بعد الحدث.",
+        "وفي المناعة الجماعية، لما شركة تتعرض لهجوم، بصمة الجهاز (30) ........ بس هي اللي بتتشارك مع باقي الشركات، وباقي بياناتها بتفضل معزولة تماماً.",
+      ];
+
+      const BLANK_ANSWERS = [
+        "DDoS",
+        "Botnet",
+        "Mirai",
+        "Nginx",
+        "Gateway",
+        "Fastify",
+        "Prisma",
+        "PostgreSQL",
+        "Redis",
+        "Docker",
+        "Ubuntu",
+        "Python",
+        "River",
+        "learn_one",
+        "pickle",
+        "منفصل",
+        "Risk Score",
+        "BLOCK",
+        "Lazy",
+        "10",
+        "ساعتين",
+        "الدائمة",
+        "TLS",
+        "Data",
+        "CAPTCHA",
+        "React",
+        "Socket.IO",
+        "Zustand",
+        "التقارير",
+        "المجردة",
+      ];
+
+      const WORD_BANK = [
+        "Express",
+        "DDoS",
+        "Kubernetes",
+        "Botnet",
+        "Redux",
+        "Fastify",
+        "ساعة",
+        "MongoDB",
+        "Mirai",
+        "Prisma",
+        "Zeus",
+        "Nginx",
+        "المؤقتة",
+        "Redis",
+        "Java",
+        "React",
+        "Gateway",
+        "القرارات",
+        "Stuxnet",
+        "Docker",
+        "TLS",
+        "Angular",
+        "Python",
+        "PostgreSQL",
+        "مشترك",
+        "Socket.IO",
+        "Cloud",
+        "Risk Score",
+        "Ransomware",
+        "7",
+        "River",
+        "Zustand",
+        "Windows",
+        "Vue",
+        "learn_one",
+        "ساعتين",
+        "Phishing",
+        "منفصل",
+        "Kafka",
+        "pickle",
+        "Ubuntu",
+        "BLOCK",
+        "JSON",
+        "MySQL",
+        "Lazy",
+        "الدائمة",
+        "Vite",
+        "10",
+        "Home",
+        "CAPTCHA",
+        "التقارير",
+        "SSL",
+        "Tailwind",
+        "Flask",
+        "يومين",
+        "TensorFlow",
+        "Data",
+        "VPN",
+        "5",
+        "Ollama",
+        "المجردة",
+        "السجلات الكاملة",
+      ];
+
+      /* ===================== STATE ===================== */
+      let allQuestions = [];
+      let currentIdx = 0;
+      let answers = []; // {correct: bool, userAns, type}
+      let violations = 0;
+      let totalSeconds = 370 * 60 + 30; // 37:30
+      let timerInterval = null;
+      let quizStarted = false;
+      let selectedWord = null;
+      let blankFills = Array(30).fill(null);
+      let currentBlankIdx = -1;
+
+      /* ===================== UTILS ===================== */
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+     function buildQuestions() {
+  // MCQ: ترتيب ثابت + عشوائية الاختيارات فقط
+  const mcqShuffled = MCQ.map((q) => {
+    const idxs = q.opts.map((_, i) => i);
+    const sh = shuffle(idxs);
+    return {
+      type: "mcq",
+      level: q.level,
+      q: q.q,
+      opts: sh.map((i) => q.opts[i]),
+      ans: sh.indexOf(q.ans),
+      note: q.note,
+      originalId: q.id,
+    };
+  });
+
+  // TF: ترتيب ثابت
+  const tfShuffled = TF.map((q) => ({
+    type: "tf",
+    q: q.q,
+    ans: q.ans,
+    note: q.note,
+    originalId: q.id,
+  }));
+
+  // Mixed: ترتيب ثابت + عشوائية الاختيارات/العناصر جوه السؤال
+  const mixedShuffled = MIXED.map((q) => {
+    if (q.type === "multi") {
+      const idxs = q.opts.map((_, i) => i);
+      const sh = shuffle(idxs);
+      return {
+        type: "multi",
+        q: q.q,
+        opts: sh.map((i) => q.opts[i]),
+        ans: q.ans.map((a) => sh.indexOf(a)).sort((a, b) => a - b),
+        note: q.note,
+        originalId: q.id,
+      };
+    }
+    if (q.type === "order") {
+      const idxs = q.items.map((_, i) => i);
+      const sh = shuffle(idxs);
+      const newAns = q.ans.map((a) => sh.indexOf(a));
+      return {
+        type: "order",
+        q: q.q,
+        items: sh.map((i) => q.items[i]),
+        ans: newAns,
+        correctOrder: q.ans,
+        note: q.note,
+        originalId: q.id,
+        map: sh,
+      };
+    }
+    if (q.type === "match") {
+      const rIdx = q.right.map((_, i) => i);
+      const shR = shuffle(rIdx);
+      return {
+        type: "match",
+        q: q.q,
+        left: q.left,
+        right: shR.map((i) => q.right[i]),
+        ans: q.ans.map((a) => shR.indexOf(a)),
+        note: q.note,
+        originalId: q.id,
+      };
+    }
+    return q;
+  });
+
+  // Blanks
+  const blanksQ = {
+    type: "blanks",
+    q: "املأ الفراغات من بنك الكلمات",
+    text: BLANKS_TEXT,
+    answers: BLANK_ANSWERS,
+    bank: shuffle(WORD_BANK), // بنك الكلمات لسه عشوائي (مفضل)
+    note: "الفراغات الحرجة: 6(Fastify) و10(Docker) و16(منفصل) و29(التقارير) و30(المجردة)",
+  };
+
+  allQuestions = [
+    ...mcqShuffled,
+    ...mixedShuffled,
+    ...tfShuffled,
+    blanksQ,
+  ];
+}
+
+      /* ===================== ANTI-CHEAT ===================== */
+      function recordViolation(reason) {
+        if (!quizStarted) return;
+        violations++;
+        document.getElementById("violationsDisplay").textContent =
+          `مخالفات: ${violations}`;
+        document.getElementById("cheatMsg").textContent = reason;
+        document.getElementById("cheatOverlay").classList.add("show");
+        if (violations == 3) {
+          endQuiz(true);
+        }
+      }
+
+      window.addEventListener("blur", () => {
+        recordViolation(
+          "فقدان التركيز: تم فتح برنامج آخر أو الانتقال لنافذة أخرى على النظام",
+        );
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          recordViolation(
+            "مغادرة التبويبة: تم تغيير التبويبة أو تصغير المتصفح",
+          );
+        }
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement && quizStarted) {
+          recordViolation("الخروج من وضع ملء الشاشة");
+        }
+      });
+
+      document.getElementById("returnBtn").onclick = () => {
+        document.getElementById("cheatOverlay").classList.remove("show");
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      };
+
+      /* ===================== TIMER ===================== */
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          totalSeconds--;
+          const m = Math.floor(totalSeconds / 60);
+          const s = totalSeconds % 60;
+          const el = document.getElementById("timerDisplay");
+          el.textContent = `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+          if (totalSeconds <= 60) el.classList.add("danger");
+          if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            endQuiz(false);
+          }
+        }, 1000);
+      }
+
+      /* ===================== RENDER ===================== */
+      function renderQuestion() {
+        const q = allQuestions[currentIdx];
+        const card = document.getElementById("questionCard");
+        document.getElementById("qProgress").textContent =
+          `السؤال ${currentIdx + 1} / ${allQuestions.length}`;
+        document.getElementById("progressFill").style.width =
+          `${(currentIdx / allQuestions.length) * 100}%`;
+
+        let html = "";
+
+        if (q.type === "mcq") {
+          const lvlClass = `lvl-${q.level}`;
+          const lvlName = ["", "أساسيات", "متوسط", "متقدم", "صعب", "الأصعب"][
+            q.level
+          ];
+          html += `<span class="level-badge ${lvlClass}">المستوى ${q.level}: ${lvlName}</span>`;
+          html += `<div class="type-tag">اختيار من متعدد</div>`;
+          html += `<div class="q-num">سؤال ${currentIdx + 1}</div>`;
+          html += `<h2>${q.q}</h2>`;
+          html += `<div class="options" id="opts">`;
+          q.opts.forEach((o, i) => {
+            html += `<div class="option" data-i="${i}" onclick="selectOption(this)">
+        <input type="radio" name="mcq" id="o${i}" value="${i}">
+        <label for="o${i}">${String.fromCharCode(65 + i)}) ${o}</label>
+      </div>`;
+          });
+          html += `</div>`;
+          html += `<div class="feedback" id="fb"></div>`;
+          html += `<div class="btn-group"><button class="btn btn-primary" id="submitBtn" onclick="submitMCQ()" disabled>تأكيد الإجابة</button></div>`;
+        } else if (q.type === "tf") {
+          html += `<div class="type-tag">صح / غلط</div>`;
+          html += `<div class="q-num">سؤال ${currentIdx + 1}</div>`;
+          html += `<h2>${q.q}</h2>`;
+          html += `<div class="options" id="opts">
+      <div class="option" data-v="true" onclick="selectTF(this)"><input type="radio" name="tf" id="t"><label for="t">صح</label></div>
+      <div class="option" data-v="false" onclick="selectTF(this)"><input type="radio" name="tf" id="f"><label for="f">غلط</label></div>
+    </div>`;
+          html += `<div class="feedback" id="fb"></div>`;
+          html += `<div class="btn-group"><button class="btn btn-primary" id="submitBtn" onclick="submitTF()" disabled>تأكيد الإجابة</button></div>`;
+        } else if (q.type === "multi") {
+          html += `<div class="type-tag">اختيار متعدد (حدد كل الصحيح)</div>`;
+          html += `<div class="q-num">سؤال ${currentIdx + 1}</div>`;
+          html += `<h2>${q.q}</h2>`;
+          html += `<div class="options" id="opts">`;
+          q.opts.forEach((o, i) => {
+            html += `<div class="option" data-i="${i}" onclick="toggleMulti(this)">
+        <input type="checkbox" id="m${i}" value="${i}">
+        <label for="m${i}">${o}</label>
+      </div>`;
+          });
+          html += `</div>`;
+          html += `<div class="feedback" id="fb"></div>`;
+          html += `<div class="btn-group"><button class="btn btn-primary" id="submitBtn" onclick="submitMulti()">تأكيد الإجابة</button></div>`;
+        } else if (q.type === "order") {
+          html += `<div class="type-tag">ترتيب (اسحب لإعادة الترتيب)</div>`;
+          html += `<div class="q-num">سؤال ${currentIdx + 1}</div>`;
+          html += `<h2>${q.q}</h2>`;
+          html += `<div class="order-list" id="orderList">`;
+          q.items.forEach((item, i) => {
+            html += `<div class="order-item" draggable="true" data-idx="${i}">
+        <span style="color:var(--muted); min-width:24px;">${i + 1}.</span>
+        <span class="item-text">${item}</span>
+      </div>`;
+          });
+          html += `</div>`;
+          html += `<div class="feedback" id="fb"></div>`;
+          html += `<div class="btn-group"><button class="btn btn-primary" id="submitBtn" onclick="submitOrder()">تأكيد الترتيب</button></div>`;
+        } else if (q.type === "match") {
+          html += `<div class="type-tag">توصيل</div>`;
+          html += `<div class="q-num">سؤال ${currentIdx + 1}</div>`;
+          html += `<h2>${q.q}</h2>`;
+          html += `<div class="match-list" id="matchList">`;
+          q.left.forEach((l, i) => {
+            html += `<div class="match-item">
+        <span style="flex:1; font-weight:600;">${l}</span>
+        <select class="match-select" data-left="${i}">
+          <option value="">— اختر —</option>
+          ${q.right.map((r, j) => `<option value="${j}">${r}</option>`).join("")}
+        </select>
+      </div>`;
+          });
+          html += `</div>`;
+          html += `<div class="feedback" id="fb"></div>`;
+          html += `<div class="btn-group"><button class="btn btn-primary" id="submitBtn" onclick="submitMatch()">تأكيد التوصيل</button></div>`;
+        } else if (q.type === "blanks") {
+          html += `<div class="type-tag">ملء الفراغات (30 فراغ)</div>`;
+          html += `<div class="q-num">السؤال الأخير</div>`;
+          html += `<h2>اختبار الفراغات: Zero Plus</h2>`;
+          html += `<p style="color:var(--muted); margin-bottom:12px;">اختر كلمة من البنك ثم اضغط على الفراغ. اضغط على فراغ مملوء لإلغائه.</p>`;
+          html += `<div class="paragraph" id="para">`;
+          q.text.forEach((line, li) => {
+            let processed = line;
+            // replace (N) ........ with blank spans
+            processed = processed.replace(/\((\d+)\)\s*\.{3,}/g, (m, num) => {
+              const idx = parseInt(num) - 1;
+              return `<span class="blank" data-idx="${idx}" id="blank${idx}" onclick="clickBlank(${idx})">(${num}) ......</span>`;
+            });
+            html += `<div style="margin-bottom:8px;">${processed}</div>`;
+          });
+          html += `</div>`;
+          html += `<div class="word-bank" id="wordBank">`;
+          q.bank.forEach((w, i) => {
+            html += `<span class="word-chip" data-w="${w}" onclick="selectWord(this)">${w}</span>`;
+          });
+          html += `</div>`;
+          html += `<div class="feedback" id="fb"></div>`;
+          html += `<div class="btn-group"><button class="btn btn-primary" id="submitBtn" onclick="submitBlanks()">تأكيد الإجابات</button></div>`;
+        }
+
+        card.innerHTML = html;
+
+        // attach drag for order
+        if (q.type === "order") {
+          setupDrag();
+        }
+      }
+
+      function selectOption(el) {
+        document
+          .querySelectorAll(".option")
+          .forEach((o) => o.classList.remove("selected"));
+        el.classList.add("selected");
+        el.querySelector("input").checked = true;
+        document.getElementById("submitBtn").disabled = false;
+      }
+
+      function selectTF(el) {
+        document
+          .querySelectorAll(".option")
+          .forEach((o) => o.classList.remove("selected"));
+        el.classList.add("selected");
+        el.querySelector("input").checked = true;
+        document.getElementById("submitBtn").disabled = false;
+      }
+
+      function toggleMulti(el) {
+        const inp = el.querySelector("input");
+        inp.checked = !inp.checked;
+        el.classList.toggle("selected", inp.checked);
+      }
+
+      /* Drag order */
+      let dragSrc = null;
+      function setupDrag() {
+        const items = document.querySelectorAll(".order-item");
+        items.forEach((item) => {
+          item.addEventListener("dragstart", (e) => {
+            dragSrc = item;
+            item.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+          });
+          item.addEventListener("dragend", () =>
+            item.classList.remove("dragging"),
+          );
+          item.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          });
+          item.addEventListener("drop", (e) => {
+            e.preventDefault();
+            if (dragSrc && dragSrc !== item) {
+              const list = document.getElementById("orderList");
+              const all = [...list.children];
+              const from = all.indexOf(dragSrc);
+              const to = all.indexOf(item);
+              if (from < to) list.insertBefore(dragSrc, item.nextSibling);
+              else list.insertBefore(dragSrc, item);
+              // re-number
+              [...list.children].forEach((c, i) => {
+                c.querySelector("span").textContent = i + 1 + ".";
+              });
+            }
+          });
+        });
+      }
+
+      /* Blanks */
+      function selectWord(chip) {
+        if (chip.classList.contains("used")) return;
+        document
+          .querySelectorAll(".word-chip")
+          .forEach((c) => c.classList.remove("selected"));
+        chip.classList.add("selected");
+        selectedWord = chip.dataset.w;
+      }
+
+      function clickBlank(idx) {
+        const blank = document.getElementById("blank" + idx);
+        if (blankFills[idx]) {
+          // unfill
+          const w = blankFills[idx];
+          blankFills[idx] = null;
+          blank.textContent = `(${idx + 1}) ......`;
+          blank.classList.remove("filled");
+          // restore chip
+          document.querySelectorAll(".word-chip").forEach((c) => {
+            if (c.dataset.w === w) c.classList.remove("used");
+          });
+        } else if (selectedWord) {
+          blankFills[idx] = selectedWord;
+          blank.textContent = selectedWord;
+          blank.classList.add("filled");
+          document.querySelectorAll(".word-chip").forEach((c) => {
+            if (c.dataset.w === selectedWord) {
+              c.classList.add("used");
+              c.classList.remove("selected");
+            }
+          });
+          selectedWord = null;
+        }
+      }
+
+      /* ===================== SUBMIT ===================== */
+      function showFeedback(correct, note) {
+        const fb = document.getElementById("fb");
+        fb.className = "feedback show " + (correct ? "correct" : "wrong");
+        fb.innerHTML = `<div class="title">${correct ? "✅ إجابة صحيحة" : "❌ إجابة خاطئة"}</div>
+    <div class="note">${note || ""}</div>`;
+        document.getElementById("submitBtn").style.display = "none";
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "btn btn-success";
+        nextBtn.textContent =
+          currentIdx < allQuestions.length - 1
+            ? "السؤال التالي ←"
+            : "إنهاء الاختبار";
+        nextBtn.onclick = nextQuestion;
+        document.querySelector(".btn-group").appendChild(nextBtn);
+      }
+
+      function submitMCQ() {
+        const q = allQuestions[currentIdx];
+        const selected = document.querySelector(".option.selected");
+        if (!selected) return;
+        const ui = parseInt(selected.dataset.i);
+        const correct = ui === q.ans;
+        answers.push({
+          type: "mcq",
+          correct,
+          level: q.level,
+          id: q.originalId,
+        });
+        // mark
+        document.querySelectorAll(".option").forEach((o, i) => {
+          o.style.pointerEvents = "none";
+          if (i === q.ans) o.classList.add("correct");
+          if (i === ui && !correct) o.classList.add("wrong");
+        });
+        showFeedback(correct, q.note);
+      }
+
+      function submitTF() {
+        const q = allQuestions[currentIdx];
+        const selected = document.querySelector(".option.selected");
+        if (!selected) return;
+        const ui = selected.dataset.v === "true";
+        const correct = ui === q.ans;
+        answers.push({ type: "tf", correct, id: q.originalId });
+        document.querySelectorAll(".option").forEach((o) => {
+          o.style.pointerEvents = "none";
+          const v = o.dataset.v === "true";
+          if (v === q.ans) o.classList.add("correct");
+          if (v === ui && !correct) o.classList.add("wrong");
+        });
+        showFeedback(correct, q.note);
+      }
+
+      function submitMulti() {
+        const q = allQuestions[currentIdx];
+        const selected = [...document.querySelectorAll(".option input:checked")]
+          .map((i) => parseInt(i.value))
+          .sort((a, b) => a - b);
+        const correct = JSON.stringify(selected) === JSON.stringify(q.ans);
+        answers.push({ type: "multi", correct, id: q.originalId });
+        document.querySelectorAll(".option").forEach((o, i) => {
+          o.style.pointerEvents = "none";
+          if (q.ans.includes(i)) o.classList.add("correct");
+          if (selected.includes(i) && !q.ans.includes(i))
+            o.classList.add("wrong");
+        });
+        showFeedback(correct, q.note);
+      }
+
+      function submitOrder() {
+        const q = allQuestions[currentIdx];
+        const list = [...document.querySelectorAll(".order-item")];
+        // current order of original map indices
+        const userOrder = list.map((el) => parseInt(el.dataset.idx));
+        // correct order is the sequence of map indices that restores original ans
+        // map[i] = original index that is now at position i
+        // we need userOrder to equal the order that makes items match ans sequence
+        // simpler: check if the sequence of texts matches the correct original order
+        const correctTexts = q.map.map((mi) =>
+          MIXED.find((m) => m.id === q.originalId).items[mi]
+            ? // better approach:
+              null
+            : null,
+        );
+        // Rebuild: the original items in correct order
+        const orig = MIXED.find((m) => m.id === q.originalId);
+        const correctSeq = orig.ans.map((ai) => orig.items[ai]);
+        const userSeq = list.map(
+          (el) => el.querySelector(".item-text").textContent,
+        );
+        const correct = JSON.stringify(userSeq) === JSON.stringify(correctSeq);
+        answers.push({ type: "order", correct, id: q.originalId });
+        list.forEach((el) => (el.style.pointerEvents = "none"));
+        showFeedback(correct, q.note);
+      }
+
+      function submitMatch() {
+        const q = allQuestions[currentIdx];
+        const selects = [...document.querySelectorAll(".match-select")];
+        const user = selects.map((s) =>
+          s.value === "" ? -1 : parseInt(s.value),
+        );
+        const correct = user.every((v, i) => v === q.ans[i]);
+        answers.push({ type: "match", correct, id: q.originalId });
+        selects.forEach((s) => (s.disabled = true));
+        showFeedback(correct, q.note);
+      }
+
+      function submitBlanks() {
+        const q = allQuestions[currentIdx];
+        let correctCount = 0;
+        for (let i = 0; i < 30; i++) {
+          const blank = document.getElementById("blank" + i);
+          if (blankFills[i] === q.answers[i]) {
+            correctCount++;
+            blank.classList.add("correct");
+          } else {
+            blank.classList.add("wrong");
+            if (blankFills[i]) blank.title = "الإجابة الصحيحة: " + q.answers[i];
+            else blank.textContent = q.answers[i];
+            blank.classList.add("filled");
+          }
+        }
+        const correct = correctCount >= 27; // strict? no, count partial
+        // we count each blank as 1 point
+        answers.push({ type: "blanks", correctCount, total: 30, id: "blanks" });
+        document
+          .querySelectorAll(".word-chip")
+          .forEach((c) => (c.style.pointerEvents = "none"));
+        document
+          .querySelectorAll(".blank")
+          .forEach((b) => (b.style.pointerEvents = "none"));
+        const pct = Math.round((correctCount / 30) * 100);
+        showFeedback(
+          correctCount >= 22,
+          `صححت ${correctCount} من 30 فراغ (${pct}%). ${q.note}`,
+        );
+      }
+
+      function nextQuestion() {
+        currentIdx++;
+        if (currentIdx >= allQuestions.length) {
+          endQuiz(false);
+        } else {
+          renderQuestion();
+        }
+      }
+
+      /* ===================== END ===================== */
+      function endQuiz(forced) {
+        clearInterval(timerInterval);
+        quizStarted = false;
+        if (document.fullscreenElement)
+          document.exitFullscreen().catch(() => {});
+
+        // calculate score
+        let correct = 0,
+          totalPoints = 0,
+          maxPoints = 0;
+        const wrongTopics = [];
+
+        answers.forEach((a) => {
+          if (a.type === "blanks") {
+            correct += a.correctCount;
+            totalPoints += a.correctCount;
+            maxPoints += 30;
+            if (a.correctCount < 22)
+              wrongTopics.push(
+                "الفراغات (المعمارية / عزل الشركات / دور Gemini)",
+              );
+          } else {
+            maxPoints += 1;
+            if (a.correct) {
+              correct++;
+              totalPoints++;
+            } else {
+              if (a.type === "mcq" && a.level >= 4)
+                wrongTopics.push("المستويات المتقدمة (Gateway / سمعة / حدود)");
+              if (a.type === "tf" && [1, 3, 6, 7, 13].includes(a.id))
+                wrongTopics.push(
+                  "صلب فكرة المشروع (Backend vs Gateway / SaaS / Gemini / Lazy / موديل منفصل)",
+                );
+              if (
+                a.type === "multi" ||
+                a.type === "order" ||
+                a.type === "match"
+              )
+                wrongTopics.push("تفاصيل المعمارية والـ Auth والـ Policy");
+            }
+          }
+        });
+
+        // if blanks not answered yet (forced end)
+        if (!answers.find((a) => a.type === "blanks")) {
+          maxPoints += 30;
+        }
+
+        const percent = maxPoints
+          ? Math.round((totalPoints / maxPoints) * 100)
+          : 0;
+
+        document.getElementById("quizScreen").classList.remove("active");
+        document.getElementById("resultScreen").classList.add("active");
+        document
+          .getElementById("scoreCircle")
+          .style.setProperty("--pct", percent);
+        document.getElementById("scorePercent").textContent = percent + "%";
+        document.getElementById("statCorrect").textContent = correct;
+        document.getElementById("statWrong").textContent =
+          maxPoints - totalPoints;
+        document.getElementById("statPoints").textContent = totalPoints;
+        document.getElementById("statTotal").textContent = maxPoints;
+
+        let grade = "";
+        if (percent >= 90)
+          grade = "🌟 ممتاز — فاهم المشروع كويس جدًا ويقدر يشرحه";
+        else if (percent >= 70)
+          grade = "👍 جيد — فاهم الأساسيات، محتاج يراجع التفاصيل";
+        else if (percent >= 50)
+          grade = "⚠️ متوسط — عارف الفكرة العامة بس مش فاهم المعمارية بالكامل";
+        else grade = "📕 ضعيف — لازم يقرأ الدوسيه تاني قبل ما يكمل شغل";
+        if (forced) grade += " (انتهى بسبب مخالفات غش)";
+        document.getElementById("gradeText").textContent = grade;
+
+        const uniqueTopics = [...new Set(wrongTopics)];
+        let analysisHtml = "<h3>تحليل نقاط الضعف</h3>";
+        if (uniqueTopics.length === 0) {
+          analysisHtml +=
+            "<p style='color:var(--accent2)'>مفيش نقاط ضعف واضحة — أداء ممتاز!</p>";
+        } else {
+          analysisHtml +=
+            "<ul>" +
+            uniqueTopics.map((t) => `<li>${t}</li>`).join("") +
+            "</ul>";
+          analysisHtml +=
+            "<p style='margin-top:10px; color:var(--muted)'>ركز على: Gateway vs Backend، دور Gemini، Lazy Registration، عزل الشركات، الحد الناعم/الصارم، والمناعة الجماعية (بصمة مجردة).</p>";
+        }
+        document.getElementById("analysisBox").innerHTML = analysisHtml;
+      }
+
+      /* ===================== START ===================== */
+      document.getElementById("startBtn").onclick = async () => {
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (e) {}
+        buildQuestions();
+        quizStarted = true;
+        document.getElementById("startScreen").classList.remove("active");
+        document.getElementById("quizScreen").classList.add("active");
+        startTimer();
+        renderQuestion();
+      };
+    </script>
+  </body>
+</html>
